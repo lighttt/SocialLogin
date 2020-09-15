@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "666490321928",
+    "firebase_url": "https://sociallogin-84342.firebaseio.com",
+    "project_id": "sociallogin-84342",
+    "storage_bucket": "sociallogin-84342.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:666490321928:android:06d4ce3af4d6a5edfbe5bd",
+        "android_client_info": {
+          "package_name": "np.com.manishtuladhar.sociallogin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "666490321928-q4dbcnr4i690pmrga9r9tt2eu9puh33q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYzWwMYL-R6Jdvb5YiFbt35tZHBuDk2G4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "666490321928-q4dbcnr4i690pmrga9r9tt2eu9puh33q.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
