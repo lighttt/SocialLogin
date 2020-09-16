@@ -6,6 +6,7 @@ import androidx.appcompat.widget.AppCompatButton;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -21,16 +22,19 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.squareup.picasso.Picasso;
 
+import java.util.HashMap;
+
 public class HomeActivity extends AppCompatActivity {
 
     private AppCompatButton logoutBtn;
     ImageView userImage;
     TextView userEmail, userName;
 
+    private static final String TAG = "HomeActivity";
+
     //auth
     FirebaseAuth mAuth;
     private GoogleSignInClient mGoogleSignInClient;
-    private GoogleSignInAccount mGoogleAccount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +43,7 @@ public class HomeActivity extends AppCompatActivity {
         logoutBtn = findViewById(R.id.logoutBtn);
         userImage = findViewById(R.id.userImage);
         userName = findViewById(R.id.usernameTV);
+        userEmail = findViewById(R.id.emailTV);
         mAuth = FirebaseAuth.getInstance();
 
         GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -46,7 +51,6 @@ public class HomeActivity extends AppCompatActivity {
                 .requestEmail()
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this,signInOptions);
-        mGoogleAccount = GoogleSignIn.getLastSignedInAccount(this);
 
         logoutBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,11 +66,13 @@ public class HomeActivity extends AppCompatActivity {
      */
     private void updateUI()
     {
-        if(mGoogleAccount !=null)
+        SharedPrefs sharedPrefs = SharedPrefs.getInstance();
+        HashMap<String,String> userData = sharedPrefs.getUserData(this);
+        if(userData !=null)
         {
-            userName.setText(mGoogleAccount.getDisplayName());
-            userEmail.setText(mGoogleAccount.getEmail());
-            Picasso.get().load(mGoogleAccount.getPhotoUrl()).into(userImage);
+            userName.setText(userData.get("displayName"));
+            userEmail.setText(userData.get("email"));
+            Picasso.get().load(userData.get("userImage")).into(userImage);
         }
     }
 
