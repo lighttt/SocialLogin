@@ -5,13 +5,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.share.Share;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -81,6 +84,9 @@ public class HomeActivity extends AppCompatActivity {
      */
     private void logoutUser()
     {
+        SharedPrefs sharedPrefs = SharedPrefs.getInstance();
+        sharedPrefs.clearUserData(this);
+
         //first sign out from firebase
         mAuth.signOut();
         //then sign out from the google sign in

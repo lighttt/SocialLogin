@@ -13,12 +13,14 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
+import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
+import com.facebook.LoggingBehavior;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
@@ -37,7 +39,9 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.squareup.picasso.Picasso;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Arrays;
@@ -51,7 +55,7 @@ public class LoginActivity extends AppCompatActivity {
     private AppCompatButton signInButton;
 
     //facebook btn
-    private AppCompatButton facebookLoginBtn;
+    private LoginButton facebookLoginBtn;
     private CallbackManager callbackManager;
 
     //firebase auth
@@ -66,6 +70,11 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         signInButton = findViewById(R.id.googleSignInBtn);
         facebookLoginBtn = findViewById(R.id.fbSignInBtn);
+
+        if (BuildConfig.DEBUG) {
+            FacebookSdk.setIsDebugEnabled(true);
+            FacebookSdk.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
+        }
 
         //configure google sign in
         GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -85,10 +94,23 @@ public class LoginActivity extends AppCompatActivity {
 
         //facebook
         callbackManager = CallbackManager.Factory.create();
-        facebookLoginBtn.setOnClickListener(new View.OnClickListener() {
+        facebookLoginBtn.setPermissions("email","public_profile");
+        facebookLoginBtn.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
-            public void onClick(View view) {
-                facebookLogin();
+            public void onSuccess(LoginResult loginResult) {
+
+            }
+
+            @Override
+            public void onCancel() {
+                // App code
+                Toast.makeText(LoginActivity.this, "Cancelled Login", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(FacebookException exception) {
+                // App code
+                Toast.makeText(LoginActivity.this, "Cannot Login Error!", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -177,36 +199,24 @@ public class LoginActivity extends AppCompatActivity {
 
     // ============================ FACEBOOK SIGN IN ===========================
 
-    private void facebookLogin()
-    {
-        LoginManager loginManager = LoginManager.getInstance();
-        loginManager.logInWithReadPermissions(LoginActivity.this,Arrays.asList("email","public_profile"));
-        // Callback registration
-        loginManager.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
-            @Override
-            public void onSuccess(LoginResult loginResult) {
+
+    AccessTokenTracker tokenTracker = new AccessTokenTracker() {
+        @Override
+        protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
+            if (currentAccessToken != null) {
                 // handle facebook token
-                firebaseAuthWithFacebook(loginResult.getAccessToken());
+                firebaseAuthWithFacebook(currentAccessToken);
+//                loadUserProfile(currentAccessToken);
+//                Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+//                startActivity(intent);
             }
-
-            @Override
-            public void onCancel() {
-                // App code
-                Toast.makeText(LoginActivity.this, "Cancelled Login", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onError(FacebookException exception) {
-                // App code
-                Toast.makeText(LoginActivity.this, "Cannot Login Error!", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
+        }
+    };
 
     /**
      * After getting the token add the user to firebase
      */
-    private void firebaseAuthWithFacebook(AccessToken token) {
+    private void firebaseAuthWithFacebook(final AccessToken token) {
         Log.e(TAG, "firebaseAuthWithFacebook: " + token);
         AuthCredential authCredential = FacebookAuthProvider.getCredential(token.getToken());
         mAuth.signInWithCredential(authCredential)
@@ -216,10 +226,7 @@ public class LoginActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             //sign in successful, update your UI to go to next activity
                             FirebaseUser mUser = mAuth.getCurrentUser();
-                            Log.e(TAG, "onComplete: user details " + mUser.getDisplayName());
-                            Log.e(TAG, "onComplete: user details " + mUser.getEmail());
-                            Log.e(TAG, "onComplete: user details " + mUser.getUid());
-                            saveUserData(mUser);
+                            loadUserProfile(token);
                             updateUI(mUser);
                         } else {
                             //sign in fails display a message
@@ -229,7 +236,34 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
-    // ============================ SAVE DATa ===========================
+    private void loadUserProfile(AccessToken newAccessToken) {
+        GraphRequest request = GraphRequest.newMeRequest(newAccessToken, new GraphRequest.GraphJSONObjectCallback() {
+            @Override
+            public void onCompleted(JSONObject object, GraphResponse response) {
+                try {
+                    String first_name = object.getString("first_name");
+                    String last_name = object.getString("last_name");
+                    String email = object.getString("email");
+                    String id = object.getString("id");
+                    String image_url = "https://graph.facebook.com/" + id + "/picture?type=normal";
+                    SharedPrefs sharedPrefs = SharedPrefs.getInstance();
+                    sharedPrefs.saveUserData(getApplicationContext(),
+                            first_name + " " + last_name,
+                            email,
+                            image_url);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        Bundle parameters = new Bundle();
+        parameters.putString("fields", "first_name,last_name,email,id");
+        request.setParameters(parameters);
+        request.executeAsync();
+    }
+
+    // ============================ SAVE DATA ===========================
 
     /**
      * Save user data to shared preferences

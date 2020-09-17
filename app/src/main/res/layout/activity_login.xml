@@ -27,27 +27,35 @@
         android:textStyle="bold"
         android:layout_centerInParent="true"/>
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:layout_below="@+id/googleSignInBtn"
-        android:id="@+id/fbSignInBtn"
+<!--    <androidx.appcompat.widget.AppCompatButton-->
+<!--        android:layout_below="@+id/googleSignInBtn"-->
+<!--        android:id="@+id/fbSignInBtn"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_centerHorizontal="true"-->
+<!--        android:layout_gravity="center"-->
+<!--        android:layout_marginTop="30dp"-->
+<!--        android:background="@color/colorPrimary"-->
+<!--        android:drawableStart="@drawable/com_facebook_button_icon"-->
+<!--        android:drawablePadding="20dp"-->
+<!--        android:paddingTop="10dp"-->
+<!--        android:paddingBottom="10dp"-->
+<!--        android:paddingLeft="15dp"-->
+<!--        android:paddingRight="15dp"-->
+<!--        android:text="Log in with Facebook"-->
+<!--        android:textAllCaps="false"-->
+<!--        android:textColor="@android:color/white"-->
+<!--        android:textSize="18sp"-->
+<!--        android:textStyle="bold"-->
+<!--        android:layout_centerInParent="true"/>-->
+
+    <com.facebook.login.widget.LoginButton
+        android:layout_marginTop="50dp"
+        android:layout_centerHorizontal="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_gravity="center"
-        android:layout_marginTop="30dp"
-        android:background="@color/colorPrimary"
-        android:drawableStart="@drawable/com_facebook_button_icon"
-        android:drawablePadding="20dp"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:paddingLeft="15dp"
-        android:paddingRight="15dp"
-        android:text="Log in with Facebook"
-        android:textAllCaps="false"
-        android:textColor="@android:color/white"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:layout_centerInParent="true"/>
+        android:layout_below="@+id/googleSignInBtn"
+        android:id="@+id/fbSignInBtn"/>
 
 
 </RelativeLayout>
